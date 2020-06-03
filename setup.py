@@ -8,16 +8,16 @@ import setuptools
 
 
 setuptools.setup(
-    name='omero-server-setup',
+    name='omero-database',
     author='Simon Li',
     author_email='spli@dundee.ac.uk',
     description='OMERO database management plugin',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     license='GPLv2',
-    url='https://github.com/manics/omero-server-setup',
+    url='https://github.com/manics/omero-cli-database',
     packages=[
-        'omero_server_setup',
+        'omero_database',
         'omero.plugins',
     ],
     setup_requires=[
@@ -27,7 +27,7 @@ setuptools.setup(
         'omero-py>=5.6.0',
     ],
     use_scm_version={
-        'write_to': 'omero_server_setup/_version.py',
+        'write_to': 'omero_database/_version.py',
     },
     classifiers=[
         'Environment :: Console',
