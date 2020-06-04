@@ -476,6 +476,49 @@ class TestDb(object):
         db.psql("arg1", "arg2")
         self.mox.VerifyAll()
 
+    def test_psql_overrides(self):
+        db = self.PartialMockDb(None, None)
+        self.mox.StubOutWithMock(db, "get_db_args_env")
+        self.mox.StubOutWithMock(omero_database.db, "run")
+
+        psqlargs = [
+            "-v",
+            "ON_ERROR_STOP=on",
+            "-w",
+            "-A",
+            "-t",
+            "-h",
+            "overridehost",
+            "-p",
+            "5432",
+            "-U",
+            "overrideuser",
+            "-d",
+            "overridename",
+            "arg1",
+            "arg2",
+        ]
+        db.get_db_args_env().AndReturn(self.create_db_test_params())
+        omero_database.db.run(
+            "psql",
+            psqlargs,
+            capturestd=True,
+            env={"PGPASSWORD": "overridepass"},
+        ).AndReturn((b"", b""))
+        self.mox.ReplayAll()
+
+        dboverrides = {
+            "host": "overridehost",
+            "user": "overrideuser",
+            "name": "overridename",
+        }
+        envoverrides = {"PGPASSWORD": "overridepass"}
+
+        db.psql(
+            "arg1", "arg2", dboverrides=dboverrides, envoverrides=envoverrides
+        )
+        self.mox.VerifyAll()
+
     def test_pgdump(self):
         db = self.PartialMockDb(None, None)
         self.mox.StubOutWithMock(db, "get_db_args_env")

@@ -341,7 +341,9 @@ class DbAdmin(object):
 
         return db, env
 
-    def psql(self, *psqlargs, version=False):
+    def psql(
+        self, *psqlargs, version=False, dboverrides=None, envoverrides=None
+    ):
         """
         Run a psql command
         """
@@ -353,6 +355,10 @@ class DbAdmin(object):
             return stdout.decode()
 
         db, env = self.get_db_args_env()
+        if dboverrides is not None:
+            db.update(dboverrides)
+        if envoverrides is not None:
+            env.update(envoverrides)
 
         args = [
             "-v",
