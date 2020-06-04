@@ -30,72 +30,77 @@ def _subparser(sub, name, func, parents, help, **kwargs):
     return parser
 
 
+def _get_parsers():
+    """
+    Arguments common to multiple sub-parsers
+    """
+
+    common_parser = ArgumentParser(add_help=False)
+    common_parser.add_argument(
+        "--verbose",
+        "-v",
+        action="count",
+        default=0,
+        help="Increase verbosity (can be used multiple times)",
+    )
+
+    db_parser = ArgumentParser(add_help=False)
+    db_parser.add_argument(
+        "--dbhost", default=None, help="Hostname of the OMERO database server",
+    )
+    db_parser.add_argument(
+        "--dbport", default=None, help="Port of the OMERO database"
+    )
+    db_parser.add_argument(
+        "--dbname", default=None, help="Name of the OMERO database"
+    )
+    db_parser.add_argument(
+        "--dbuser",
+        default=None,
+        help="Username for connecting to the OMERO database",
+    )
+    db_parser.add_argument(
+        "--dbpass",
+        default=None,
+        help="Password for connecting to the OMERO database",
+    )
+    db_parser.add_argument(
+        "--no-db-config",
+        action="store_true",
+        help="Ignore the database settings in omero config",
+    )
+    db_parser.add_argument(
+        "-n",
+        "--dry-run",
+        action="store_true",
+        help=(
+            "Simulation/check mode. In 'upgrade' mode exits with code "
+            "{}:upgrade required "
+            "{}:database isn't initialised "
+            "{}:unable to connect to database "
+            "{}:database is up-to-date.".format(
+                DB_UPGRADE_NEEDED,
+                DB_INIT_NEEDED,
+                DB_NO_CONNECTION,
+                DB_UPTODATE,
+            )
+        ),
+    )
+
+    omerosql_parser = ArgumentParser(add_help=False)
+    omerosql_parser.add_argument(
+        "--omerosql", help="OMERO database SQL initialisation file"
+    )
+    omerosql_parser.add_argument(
+        "--rootpass", default="omero", help="OMERO admin password"
+    )
+
+    return common_parser, db_parser, omerosql_parser
+
+
 class DatabaseControl(BaseControl):
     def _configure(self, parser):
-        # Arguments common to multiple sub-parsers
-
-        common_parser = ArgumentParser(add_help=False)
-        common_parser.add_argument(
-            "--verbose",
-            "-v",
-            action="count",
-            default=0,
-            help="Increase verbosity (can be used multiple times)",
-        )
-
-        db_parser = ArgumentParser(add_help=False)
-        db_parser.add_argument(
-            "--dbhost",
-            default=None,
-            help="Hostname of the OMERO database server",
-        )
-        db_parser.add_argument(
-            "--dbport", default=None, help="Port of the OMERO database"
-        )
-        db_parser.add_argument(
-            "--dbname", default=None, help="Name of the OMERO database"
-        )
-        db_parser.add_argument(
-            "--dbuser",
-            default=None,
-            help="Username for connecting to the OMERO database",
-        )
-        db_parser.add_argument(
-            "--dbpass",
-            default=None,
-            help="Password for connecting to the OMERO database",
-        )
-        db_parser.add_argument(
-            "--no-db-config",
-            action="store_true",
-            help="Ignore the database settings in omero config",
-        )
-        db_parser.add_argument(
-            "-n",
-            "--dry-run",
-            action="store_true",
-            help=(
-                "Simulation/check mode. In 'upgrade' mode exits with code "
-                "{}:upgrade required "
-                "{}:database isn't initialised "
-                "{}:unable to connect to database "
-                "{}:database is up-to-date.".format(
-                    DB_UPGRADE_NEEDED,
-                    DB_INIT_NEEDED,
-                    DB_NO_CONNECTION,
-                    DB_UPTODATE,
-                )
-            ),
-        )
-
-        omerosql_parser = ArgumentParser(add_help=False)
-        omerosql_parser.add_argument(
-            "--omerosql", help="OMERO database SQL initialisation file"
-        )
-        omerosql_parser.add_argument(
-            "--rootpass", default="omero", help="OMERO admin password"
-        )
-
+        common_parser, db_parser, omerosql_parser = _get_parsers()
         sub = parser.sub()
 
         _subparser(
